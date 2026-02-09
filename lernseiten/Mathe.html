@@ -80,6 +80,37 @@ button:hover {
     text-align: center;
     font-size: 18px;
 }
+
+/* SHAKE EFFECT */
+@keyframes shake {
+    0% { transform: translateX(0); }
+    20% { transform: translateX(-6px); }
+    40% { transform: translateX(6px); }
+    60% { transform: translateX(-6px); }
+    80% { transform: translateX(6px); }
+    100% { transform: translateX(0); }
+}
+
+.shake {
+    animation: shake 0.25s;
+}
+
+/* CONFETTI */
+.confetti {
+    position: fixed;
+    width: 8px;
+    height: 8px;
+    top: -10px;
+    animation: fall 0.25s linear forwards;
+    z-index: 9999;
+}
+
+@keyframes fall {
+    to {
+        transform: translateY(110vh) rotate(360deg);
+        opacity: 0;
+    }
+}
 </style>
 </head>
 <body>
@@ -130,39 +161,66 @@ function r(max) {
 
 function newTask() {
     const max = Number(difficulty.value);
-    let parts = [];
+    let types = [];
 
-    if (add.checked) parts.push("+");
-    if (sub.checked) parts.push("-");
-    if (mul.checked) parts.push("*");
-    if (div.checked) parts.push("/");
-    if (pow.checked) parts.push("^");
+    if (add.checked) types.push("+");
+    if (sub.checked) types.push("-");
+    if (mul.checked) types.push("*");
+    if (div.checked) types.push("/");
+    if (pow.checked) types.push("^");
 
-    if (parts.length === 0) {
-        task.textContent = "Bitte Aufgabentyp wählen";
+    if (types.length === 0) {
+        task.textContent = "Bitte mindestens einen Aufgabentyp wählen";
         return;
     }
 
+    // Zufällige Zahlen
     let a = r(max);
     let b = r(10);
     let c = r(10);
 
-    let expr = `${a} ${parts[Math.floor(Math.random()*parts.length)]} ${b}`;
+    // Zufälliger Typ
+    let expr = `${a} ${types[Math.floor(Math.random()*types.length)]} ${b}`;
 
-    if (brackets.checked) {
-        expr = `(${expr}) ${parts[Math.floor(Math.random()*parts.length)]} ${c}`;
+    // Klammern zufällig hinzufügen
+    if (brackets.checked && Math.random() > 0.3) {
+        expr = `(${expr}) ${types[Math.floor(Math.random()*types.length)]} ${c}`;
     }
 
+    // Wurzel zufällig
     if (sqrt.checked && Math.random() > 0.6) {
         const s = r(15);
         expr = `Math.sqrt(${s*s}) + ${r(10)}`;
     }
 
-    solution = Math.round(eval(expr) * 100) / 100;
-    task.textContent = expr.replace("Math.sqrt", "√");
+    // Potenzen zufällig
+    if (pow.checked && Math.random() > 0.7) {
+        const base = r(5);
+        const exp = r(3);
+        expr = `${base}**${exp} + ${r(10)}`;
+    }
 
+    solution = Math.round(eval(expr) * 100) / 100;
+    task.textContent = expr.replace("Math.sqrt", "√").replace(/\*\*/g, "^");
     status.textContent = "";
     answer.value = "";
+}
+
+function party() {
+    for (let i = 0; i < 25; i++) {
+        const c = document.createElement("div");
+        c.className = "confetti";
+        c.style.left = Math.random() * 100 + "vw";
+        c.style.background = `hsl(${Math.random() * 360}, 80%, 60%)`;
+        c.style.animationDuration = "0.25s";
+        document.body.appendChild(c);
+        setTimeout(() => c.remove(), 300);
+    }
+}
+
+function shakeScreen() {
+    document.body.classList.add("shake");
+    setTimeout(() => document.body.classList.remove("shake"), 250);
 }
 
 function check() {
@@ -170,10 +228,12 @@ function check() {
     if (Math.abs(user - solution) < 0.01) {
         score += 5;
         status.textContent = "✅ Richtig! +5";
-        newTask();
+        party();
+        setTimeout(newTask, 250);
     } else {
         score -= 10;
         status.textContent = "❌ Falsch! Richtige Lösung: " + solution;
+        shakeScreen();
     }
     scoreSpan.textContent = score;
 }
