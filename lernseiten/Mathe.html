@@ -2,12 +2,13 @@
 <html lang="de">
 <head>
 <meta charset="UTF-8">
-<title>Mathe Trainer</title>
-
+<title>Mathe Pro</title>
 <style>
 body {
-    font-family: Arial, sans-serif;
-    background: #f0f0f0;
+    margin: 0;
+    font-family: system-ui, sans-serif;
+    background: #0f1220;
+    color: #fff;
     padding: 20px;
 }
 
@@ -15,152 +16,170 @@ h1 {
     text-align: center;
 }
 
-.box {
-    background: white;
+.panel {
+    background: #1c1f3a;
     padding: 15px;
-    border-radius: 10px;
+    border-radius: 14px;
     margin-bottom: 15px;
 }
 
-label {
-    display: block;
-    margin: 5px 0;
+.options {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+    gap: 8px;
 }
 
-button {
-    padding: 10px 15px;
-    margin-top: 10px;
-    font-size: 16px;
+label {
+    background: #2a2e5a;
+    padding: 10px;
+    border-radius: 10px;
     cursor: pointer;
 }
 
-.task {
-    font-size: 22px;
-    margin: 15px 0;
+label input {
+    margin-right: 6px;
 }
 
-input[type="number"] {
+.task {
+    font-size: 26px;
+    text-align: center;
+    margin: 20px 0;
+}
+
+.answer {
+    width: 100%;
+    padding: 12px;
     font-size: 18px;
-    padding: 5px;
-    width: 120px;
+    border-radius: 10px;
+    border: none;
+}
+
+button {
+    width: 100%;
+    margin-top: 10px;
+    padding: 14px;
+    font-size: 18px;
+    border: none;
+    border-radius: 12px;
+    background: #4cafef;
+    color: black;
+    cursor: pointer;
+}
+
+button:hover {
+    opacity: 0.9;
+}
+
+.status {
+    text-align: center;
+    margin-top: 10px;
+    font-size: 16px;
 }
 
 .score {
+    text-align: center;
     font-size: 18px;
-    margin-top: 10px;
 }
 </style>
 </head>
 <body>
 
-<h1>Mathe Trainer</h1>
+<h1>🧮 Mathe Pro</h1>
 
-<div class="box">
+<div class="panel">
     <strong>Schwierigkeit</strong>
-    <select id="difficulty">
+    <select id="difficulty" class="answer">
         <option value="10">Leicht</option>
         <option value="50">Mittel</option>
         <option value="100">Schwer</option>
     </select>
 </div>
 
-<div class="box">
-    <strong>Aufgaben Typen</strong>
-    <label><input type="checkbox" id="add" checked> Addition</label>
-    <label><input type="checkbox" id="sub" checked> Subtraktion</label>
-    <label><input type="checkbox" id="mul"> Multiplikation</label>
-    <label><input type="checkbox" id="div"> Division</label>
-    <label><input type="checkbox" id="sqrt"> Wurzel</label>
+<div class="panel">
+    <strong>Aufgabentypen</strong>
+    <div class="options">
+        <label><input type="checkbox" id="add" checked> Addition</label>
+        <label><input type="checkbox" id="sub" checked> Subtraktion</label>
+        <label><input type="checkbox" id="mul" checked> Multiplikation</label>
+        <label><input type="checkbox" id="div"> Division</label>
+        <label><input type="checkbox" id="sqrt"> Wurzel</label>
+        <label><input type="checkbox" id="pow"> Potenz</label>
+        <label><input type="checkbox" id="brackets" checked> Klammern</label>
+        <label><input type="checkbox" id="negative"> Negative Zahlen</label>
+        <label><input type="checkbox" id="decimals"> Kommazahlen</label>
+    </div>
 </div>
 
-<div class="box">
-    <div class="task" id="task">Drücke „Neue Aufgabe“</div>
-    <input type="number" id="answer">
-    <br>
-    <button onclick="check()">Prüfen</button>
-    <button onclick="newTask()">Neue Aufgabe</button>
+<div class="panel">
+    <div class="task" id="task">Neue Aufgabe starten</div>
+    <input id="answer" class="answer" type="number" step="any">
+    <button onclick="check()">Antwort prüfen</button>
+    <div class="status" id="status"></div>
     <div class="score">Punkte: <span id="score">0</span></div>
 </div>
 
-<a href="../index.html">Zurück zur Übersicht</a>
+<a href="../index.html" style="color:#8ab4ff">← Zurück</a>
 
 <script>
-let correctAnswer = null;
 let score = 0;
+let solution = 0;
 
-function random(max) {
+function r(max) {
     return Math.floor(Math.random() * max) + 1;
 }
 
 function newTask() {
-    const max = Number(document.getElementById("difficulty").value);
-    const types = [];
+    const max = Number(difficulty.value);
+    let parts = [];
 
-    if (add.checked) types.push("add");
-    if (sub.checked) types.push("sub");
-    if (mul.checked) types.push("mul");
-    if (div.checked) types.push("div");
-    if (sqrt.checked) types.push("sqrt");
+    if (add.checked) parts.push("+");
+    if (sub.checked) parts.push("-");
+    if (mul.checked) parts.push("*");
+    if (div.checked) parts.push("/");
+    if (pow.checked) parts.push("^");
 
-    if (types.length === 0) {
-        alert("Bitte mindestens einen Aufgabentyp auswählen");
+    if (parts.length === 0) {
+        task.textContent = "Bitte Aufgabentyp wählen";
         return;
     }
 
-    const type = types[Math.floor(Math.random() * types.length)];
-    let a, b;
+    let a = r(max);
+    let b = r(10);
+    let c = r(10);
 
-    if (type === "add") {
-        a = random(max);
-        b = random(max);
-        correctAnswer = a + b;
-        task.textContent = `${a} + ${b}`;
+    let expr = `${a} ${parts[Math.floor(Math.random()*parts.length)]} ${b}`;
+
+    if (brackets.checked) {
+        expr = `(${expr}) ${parts[Math.floor(Math.random()*parts.length)]} ${c}`;
     }
 
-    if (type === "sub") {
-        a = random(max);
-        b = random(max);
-        correctAnswer = a - b;
-        task.textContent = `${a} - ${b}`;
+    if (sqrt.checked && Math.random() > 0.6) {
+        const s = r(15);
+        expr = `Math.sqrt(${s*s}) + ${r(10)}`;
     }
 
-    if (type === "mul") {
-        a = random(max);
-        b = random(10);
-        correctAnswer = a * b;
-        task.textContent = `${a} · ${b}`;
-    }
+    solution = Math.round(eval(expr) * 100) / 100;
+    task.textContent = expr.replace("Math.sqrt", "√");
 
-    if (type === "div") {
-        b = random(10);
-        correctAnswer = random(10);
-        a = correctAnswer * b;
-        task.textContent = `${a} ÷ ${b}`;
-    }
-
-    if (type === "sqrt") {
-        correctAnswer = random(20);
-        a = correctAnswer * correctAnswer;
-        task.textContent = `√${a}`;
-    }
-
+    status.textContent = "";
     answer.value = "";
 }
 
 function check() {
     const user = Number(answer.value);
-
-    if (user === correctAnswer) {
+    if (Math.abs(user - solution) < 0.01) {
         score += 5;
-        alert("Richtig! +5 Punkte");
+        status.textContent = "✅ Richtig! +5";
         newTask();
     } else {
         score -= 10;
-        alert("Falsch! -10 Punkte\nRichtig wäre: " + correctAnswer);
+        status.textContent = "❌ Falsch! Richtige Lösung: " + solution;
     }
-
-    document.getElementById("score").textContent = score;
+    scoreSpan.textContent = score;
 }
+
+const scoreSpan = document.getElementById("score");
+newTask();
 </script>
 
 </body>
