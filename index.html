@@ -29,6 +29,7 @@ canvas {
     border: 2px solid #222;
     touch-action: none;
 }
+
 #result {
     margin-top: 10px;
     font-size: 18px;
@@ -62,18 +63,17 @@ const ctx = canvas.getContext("2d");
 
 let drawing = false;
 
-// Buchstabenmenü füllen
+// Buchstabenmenü
 const letterSelect = document.getElementById("letterSelect");
 for (let i = 65; i <= 90; i++) {
     letterSelect.innerHTML += `<option>${String.fromCharCode(i)}</option>`;
 }
-
 letterSelect.value = "A";
 
-document.getElementById("caseSelect").addEventListener("change", drawTemplate);
 letterSelect.addEventListener("change", drawTemplate);
+document.getElementById("caseSelect").addEventListener("change", drawTemplate);
 
-// Vorlage zeichnen
+// Vorlage
 function drawTemplate() {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 
@@ -81,7 +81,7 @@ function drawTemplate() {
     const isUpper = document.getElementById("caseSelect").value === "upper";
     const char = isUpper ? letter : letter.toLowerCase();
 
-    ctx.globalAlpha = 0.18;
+    ctx.globalAlpha = 0.2;
     ctx.font = "230px Arial";
     ctx.fillStyle = "black";
     ctx.textAlign = "center";
@@ -117,8 +117,9 @@ function resetCanvas() {
     document.getElementById("result").textContent = "Accuracy: –";
 }
 
-// Genauere Erkennung
+// REALISTISCHER CHECK
 function checkAccuracy() {
+    // Zielbuchstabe extra rendern
     const off = document.createElement("canvas");
     off.width = canvas.width;
     off.height = canvas.height;
@@ -136,31 +137,28 @@ function checkAccuracy() {
     const drawn = ctx.getImageData(0, 0, canvas.width, canvas.height).data;
     const target = octx.getImageData(0, 0, canvas.width, canvas.height).data;
 
-    let hit = 0;
-    let miss = 0;
-    let totalTarget = 0;
+    let score = 0;
+    let maxScore = 0;
 
     for (let i = 0; i < drawn.length; i += 4) {
-        const d = drawn[i + 3] > 40;
-        const t = target[i + 3] > 40;
+        const drawnHere = drawn[i + 3] > 40;   // Nutzer-Strich
+        const targetHere = target[i + 3] > 40; // Buchstabe
 
-        if (t) {
-            totalTarget++;
-            if (d) hit++;
+        if (targetHere) {
+            maxScore += 5;
+            if (drawnHere) score += 5;   // richtig getroffen
         } else {
-            if (d) miss++;
+            if (drawnHere) score -= 10;  // WEISS getroffen → hart runter
         }
     }
 
-    let coverage = hit / totalTarget;          // wie viel getroffen
-    let precision = hit / (hit + miss || 1);   // wie wenig daneben
-
-    let accuracy = Math.round((coverage * 0.7 + precision * 0.3) * 100);
+    let accuracy = Math.round((score / maxScore) * 100);
+    accuracy = Math.max(0, Math.min(100, accuracy));
 
     let text = "Accuracy: " + accuracy + "% ";
-    if (accuracy >= 75) text += "✅ sehr gut";
-    else if (accuracy >= 55) text += "👍 okay";
-    else text += "❌ üben";
+    if (accuracy >= 80) text += "🔥 sehr sauber";
+    else if (accuracy >= 60) text += "👍 passt";
+    else text += "❌ zu viel daneben";
 
     document.getElementById("result").textContent = text;
 }
