@@ -12,9 +12,7 @@ body {
     padding: 20px;
 }
 
-h1 {
-    text-align: center;
-}
+h1 { text-align: center; }
 
 .panel {
     background: #1c1f3a;
@@ -36,50 +34,19 @@ label {
     cursor: pointer;
 }
 
-label input {
-    margin-right: 6px;
-}
+label input { margin-right: 6px; }
 
-.task {
-    font-size: 26px;
-    text-align: center;
-    margin: 20px 0;
-}
-
-.answer {
-    width: 100%;
-    padding: 12px;
-    font-size: 18px;
-    border-radius: 10px;
-    border: none;
-}
+.task { font-size: 26px; text-align: center; margin: 20px 0; }
+.answer { width: 100%; padding: 12px; font-size: 18px; border-radius: 10px; border: none; }
 
 button {
-    width: 100%;
-    margin-top: 10px;
-    padding: 14px;
-    font-size: 18px;
-    border: none;
-    border-radius: 12px;
-    background: #4cafef;
-    color: black;
-    cursor: pointer;
+    width: 100%; margin-top: 10px; padding: 14px; font-size: 18px;
+    border: none; border-radius: 12px; background: #4cafef; color: black; cursor: pointer;
 }
 
-button:hover {
-    opacity: 0.9;
-}
-
-.status {
-    text-align: center;
-    margin-top: 10px;
-    font-size: 16px;
-}
-
-.score {
-    text-align: center;
-    font-size: 18px;
-}
+button:hover { opacity: 0.9; }
+.status { text-align: center; margin-top: 10px; font-size: 16px; }
+.score { text-align: center; font-size: 18px; }
 
 /* SHAKE EFFECT */
 @keyframes shake {
@@ -90,10 +57,7 @@ button:hover {
     80% { transform: translateX(6px); }
     100% { transform: translateX(0); }
 }
-
-.shake {
-    animation: shake 0.25s;
-}
+.shake { animation: shake 0.25s; }
 
 /* CONFETTI */
 .confetti {
@@ -104,13 +68,7 @@ button:hover {
     animation: fall 0.25s linear forwards;
     z-index: 9999;
 }
-
-@keyframes fall {
-    to {
-        transform: translateY(110vh) rotate(360deg);
-        opacity: 0;
-    }
-}
+@keyframes fall { to { transform: translateY(110vh) rotate(360deg); opacity:0; } }
 </style>
 </head>
 <body>
@@ -120,11 +78,16 @@ button:hover {
 <div class="panel">
     <strong>Schwierigkeit / Klassenstufe</strong>
     <select id="difficulty" class="answer">
-        <option value="1">Leicht (1.–3. Klasse)</option>
-        <option value="2">Mittel (4.–6. Klasse)</option>
-        <option value="3">Schwer (7.–9. Klasse)</option>
-        <option value="4">Sehr schwer (10.–12. Klasse)</option>
-        <option value="5">Profi (Berufsschule)</option>
+        <option value="1">1. Klasse</option>
+        <option value="2">2. Klasse</option>
+        <option value="3">3. Klasse</option>
+        <option value="4">4.–6. Klasse</option>
+        <option value="5">7.–9. Klasse</option>
+        <option value="6">10.–12. Klasse</option>
+        <option value="7">Berufsschule leicht</option>
+        <option value="8">Berufsschule mittel</option>
+        <option value="9">Berufsschule schwer</option>
+        <option value="10">Profi / komplex</option>
     </select>
 </div>
 
@@ -140,6 +103,7 @@ button:hover {
         <label><input type="checkbox" id="brackets" checked> Klammern</label>
         <label><input type="checkbox" id="negative"> Negative Zahlen</label>
         <label><input type="checkbox" id="decimals"> Kommazahlen</label>
+        <label><input type="checkbox" id="chain"> Kettenaufgabe</label>
     </div>
 </div>
 
@@ -154,109 +118,66 @@ button:hover {
 <a href="../index.html" style="color:#8ab4ff">← Zurück</a>
 
 <script>
-let score = 0;
-let solution = 0;
+let score=0, solution=0;
+function r(max){return Math.floor(Math.random()*max)+1;}
+function party(){for(let i=0;i<25;i++){const c=document.createElement("div");c.className="confetti";c.style.left=Math.random()*100+"vw";c.style.background=`hsl(${Math.random()*360},80%,60%)`;c.style.animationDuration="0.25s";document.body.appendChild(c);setTimeout(()=>c.remove(),300);}}
+function shakeScreen(){document.body.classList.add("shake");setTimeout(()=>document.body.classList.remove("shake"),250);}
 
-// Zufallsfunktion
-function r(max) { return Math.floor(Math.random() * max) + 1; }
-
-function newTask() {
+function newTask(){
     const level = Number(difficulty.value);
-    let types = [];
-    if (add.checked) types.push("+");
-    if (sub.checked) types.push("-");
-    if (mul.checked) types.push("*");
-    if (div.checked) types.push("/");
-    if (pow.checked) types.push("^");
+    let types=[];
+    if(add.checked) types.push("+");
+    if(sub.checked) types.push("-");
+    if(mul.checked) types.push("*");
+    if(div.checked) types.push("/");
+    if(pow.checked) types.push("^");
+    if(types.length===0){task.textContent="Bitte mindestens einen Aufgabentyp wählen"; return;}
 
-    if (types.length === 0) {
-        task.textContent = "Bitte mindestens einen Aufgabentyp wählen";
-        return;
+    let expr="";
+    let partCount=1;
+    if(chain.checked){partCount=2+Math.floor(Math.random()*2);} // 2–3 Teilaufgaben
+
+    for(let i=0;i<partCount;i++){
+        let a,b,c;
+        switch(level){
+            case 1: a=r(10); b=r(10); c=r(5); break;
+            case 2: a=r(20); b=r(20); c=r(10); break;
+            case 3: a=r(50); b=r(50); c=r(20); break;
+            case 4: a=r(100); b=r(50); c=r(30); break;
+            case 5: a=r(150); b=r(100); c=r(50); break;
+            case 6: a=r(200); b=r(100); c=r(50); break;
+            case 7: a=r(300); b=r(150); c=r(100); break;
+            case 8: a=r(400); b=r(200); c=r(150); break;
+            case 9: a=r(500); b=r(200); c=r(150); break;
+            case 10:a=r(1000); b=r(500); c=r(200); break;
+        }
+
+        let partExpr=`${a} ${types[Math.floor(Math.random()*types.length)]} ${b}`;
+        if(brackets.checked && Math.random()>0.3){partExpr=`(${partExpr}) ${types[Math.floor(Math.random()*types.length)]} ${c}`;}
+        if(sqrt.checked && Math.random()>0.5 && level>=3){const s=r(Math.min(20,a)); partExpr=`Math.sqrt(${s*s}) + ${r(10)}`;}
+        if(pow.checked && Math.random()>0.6 && level>=4){const base=r(10); const exp=r(3); partExpr=`${base}**${exp} + ${r(10)}`;}
+        if(negative.checked && Math.random()>0.5){partExpr="-"+partExpr;}
+        if(decimals.checked && Math.random()>0.5){partExpr+= " + " + (Math.random()*10).toFixed(2);}
+
+        if(expr===""){expr=partExpr;}else{expr+= ` ${types[Math.floor(Math.random()*types.length)]} ${partExpr}`;}
     }
 
-    // Zahlenbereich je Schwierigkeitsgrad
-    let a, b, c;
-    switch(level){
-        case 1: a=r(10); b=r(10); c=r(5); break; // 1.–3.
-        case 2: a=r(50); b=r(20); c=r(20); break; // 4.–6.
-        case 3: a=r(100); b=r(50); c=r(30); break; // 7.–9.
-        case 4: a=r(200); b=r(100); c=r(50); break; // 10.–12.
-        case 5: a=r(500); b=r(200); c=r(100); break; // Berufsschule
-    }
-
-    // Basisaufgabe
-    let expr = `${a} ${types[Math.floor(Math.random()*types.length)]} ${b}`;
-
-    // Klammern
-    if (brackets.checked && Math.random() > 0.3) {
-        expr = `(${expr}) ${types[Math.floor(Math.random()*types.length)]} ${c}`;
-    }
-
-    // Wurzel für höhere Level
-    if (sqrt.checked && Math.random() > 0.5 && level>=3) {
-        const s = r(Math.min(20, a));
-        expr = `Math.sqrt(${s*s}) + ${r(10)}`;
-    }
-
-    // Potenz für Profi-Level
-    if (pow.checked && Math.random() > 0.6 && level>=4) {
-        const base = r(10);
-        const exp = r(3);
-        expr = `${base}**${exp} + ${r(10)}`;
-    }
-
-    // Negative Zahlen
-    if (negative.checked && Math.random() > 0.5) {
-        expr = "-" + expr;
-    }
-
-    // Dezimalzahlen
-    if (decimals.checked && Math.random() > 0.5) {
-        expr += " + " + (Math.random()*10).toFixed(2);
-    }
-
-    solution = Math.round(eval(expr) * 100) / 100;
-    task.textContent = expr.replace("Math.sqrt", "√").replace(/\*\*/g, "^");
-    status.textContent = "";
-    answer.value = "";
+    solution=Math.round(eval(expr)*100)/100;
+    task.textContent=expr.replace("Math.sqrt","√").replace(/\*\*/g,"^");
+    status.textContent=""; answer.value="";
 }
 
-// Party-Konfetti
-function party() {
-    for (let i = 0; i < 25; i++) {
-        const c = document.createElement("div");
-        c.className = "confetti";
-        c.style.left = Math.random() * 100 + "vw";
-        c.style.background = `hsl(${Math.random() * 360}, 80%, 60%)`;
-        c.style.animationDuration = "0.25s";
-        document.body.appendChild(c);
-        setTimeout(() => c.remove(), 300);
+function check(){
+    const user=Number(answer.value);
+    if(Math.abs(user-solution)<0.01){
+        score+=5; status.textContent="✅ Richtig! +5"; party(); setTimeout(newTask,250);
+    }else{
+        score-=10; status.textContent="❌ Falsch! Richtige Lösung: "+solution; shakeScreen();
     }
+    scoreSpan.textContent=score;
 }
 
-// Shake bei falsch
-function shakeScreen() {
-    document.body.classList.add("shake");
-    setTimeout(() => document.body.classList.remove("shake"), 250);
-}
-
-// Prüfen
-function check() {
-    const user = Number(answer.value);
-    if (Math.abs(user - solution) < 0.01) {
-        score += 5;
-        status.textContent = "✅ Richtig! +5";
-        party();
-        setTimeout(newTask, 250);
-    } else {
-        score -= 10;
-        status.textContent = "❌ Falsch! Richtige Lösung: " + solution;
-        shakeScreen();
-    }
-    scoreSpan.textContent = score;
-}
-
-const scoreSpan = document.getElementById("score");
+const scoreSpan=document.getElementById("score");
 newTask();
 </script>
 
