@@ -118,11 +118,13 @@ button:hover {
 <h1>🧮 Mathe Pro</h1>
 
 <div class="panel">
-    <strong>Schwierigkeit</strong>
+    <strong>Schwierigkeit / Klassenstufe</strong>
     <select id="difficulty" class="answer">
-        <option value="10">Leicht</option>
-        <option value="50">Mittel</option>
-        <option value="100">Schwer</option>
+        <option value="1">Leicht (1.–3. Klasse)</option>
+        <option value="2">Mittel (4.–6. Klasse)</option>
+        <option value="3">Schwer (7.–9. Klasse)</option>
+        <option value="4">Sehr schwer (10.–12. Klasse)</option>
+        <option value="5">Profi (Berufsschule)</option>
     </select>
 </div>
 
@@ -155,14 +157,12 @@ button:hover {
 let score = 0;
 let solution = 0;
 
-function r(max) {
-    return Math.floor(Math.random() * max) + 1;
-}
+// Zufallsfunktion
+function r(max) { return Math.floor(Math.random() * max) + 1; }
 
 function newTask() {
-    const max = Number(difficulty.value);
+    const level = Number(difficulty.value);
     let types = [];
-
     if (add.checked) types.push("+");
     if (sub.checked) types.push("-");
     if (mul.checked) types.push("*");
@@ -174,30 +174,45 @@ function newTask() {
         return;
     }
 
-    // Zufällige Zahlen
-    let a = r(max);
-    let b = r(10);
-    let c = r(10);
+    // Zahlenbereich je Schwierigkeitsgrad
+    let a, b, c;
+    switch(level){
+        case 1: a=r(10); b=r(10); c=r(5); break; // 1.–3.
+        case 2: a=r(50); b=r(20); c=r(20); break; // 4.–6.
+        case 3: a=r(100); b=r(50); c=r(30); break; // 7.–9.
+        case 4: a=r(200); b=r(100); c=r(50); break; // 10.–12.
+        case 5: a=r(500); b=r(200); c=r(100); break; // Berufsschule
+    }
 
-    // Zufälliger Typ
+    // Basisaufgabe
     let expr = `${a} ${types[Math.floor(Math.random()*types.length)]} ${b}`;
 
-    // Klammern zufällig hinzufügen
+    // Klammern
     if (brackets.checked && Math.random() > 0.3) {
         expr = `(${expr}) ${types[Math.floor(Math.random()*types.length)]} ${c}`;
     }
 
-    // Wurzel zufällig
-    if (sqrt.checked && Math.random() > 0.6) {
-        const s = r(15);
+    // Wurzel für höhere Level
+    if (sqrt.checked && Math.random() > 0.5 && level>=3) {
+        const s = r(Math.min(20, a));
         expr = `Math.sqrt(${s*s}) + ${r(10)}`;
     }
 
-    // Potenzen zufällig
-    if (pow.checked && Math.random() > 0.7) {
-        const base = r(5);
+    // Potenz für Profi-Level
+    if (pow.checked && Math.random() > 0.6 && level>=4) {
+        const base = r(10);
         const exp = r(3);
         expr = `${base}**${exp} + ${r(10)}`;
+    }
+
+    // Negative Zahlen
+    if (negative.checked && Math.random() > 0.5) {
+        expr = "-" + expr;
+    }
+
+    // Dezimalzahlen
+    if (decimals.checked && Math.random() > 0.5) {
+        expr += " + " + (Math.random()*10).toFixed(2);
     }
 
     solution = Math.round(eval(expr) * 100) / 100;
@@ -206,6 +221,7 @@ function newTask() {
     answer.value = "";
 }
 
+// Party-Konfetti
 function party() {
     for (let i = 0; i < 25; i++) {
         const c = document.createElement("div");
@@ -218,11 +234,13 @@ function party() {
     }
 }
 
+// Shake bei falsch
 function shakeScreen() {
     document.body.classList.add("shake");
     setTimeout(() => document.body.classList.remove("shake"), 250);
 }
 
+// Prüfen
 function check() {
     const user = Number(answer.value);
     if (Math.abs(user - solution) < 0.01) {
