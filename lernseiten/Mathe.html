@@ -2,14 +2,166 @@
 <html lang="de">
 <head>
 <meta charset="UTF-8">
-<title>Mathe</title>
+<title>Mathe Trainer</title>
+
+<style>
+body {
+    font-family: Arial, sans-serif;
+    background: #f0f0f0;
+    padding: 20px;
+}
+
+h1 {
+    text-align: center;
+}
+
+.box {
+    background: white;
+    padding: 15px;
+    border-radius: 10px;
+    margin-bottom: 15px;
+}
+
+label {
+    display: block;
+    margin: 5px 0;
+}
+
+button {
+    padding: 10px 15px;
+    margin-top: 10px;
+    font-size: 16px;
+    cursor: pointer;
+}
+
+.task {
+    font-size: 22px;
+    margin: 15px 0;
+}
+
+input[type="number"] {
+    font-size: 18px;
+    padding: 5px;
+    width: 120px;
+}
+
+.score {
+    font-size: 18px;
+    margin-top: 10px;
+}
+</style>
 </head>
 <body>
 
-<h1>Mathe Lernseite</h1>
-<p>Hier kommt dein Lerninhalt rein.</p>
+<h1>Mathe Trainer</h1>
 
-<a href="../index.html">Zurück</a>
+<div class="box">
+    <strong>Schwierigkeit</strong>
+    <select id="difficulty">
+        <option value="10">Leicht</option>
+        <option value="50">Mittel</option>
+        <option value="100">Schwer</option>
+    </select>
+</div>
+
+<div class="box">
+    <strong>Aufgaben Typen</strong>
+    <label><input type="checkbox" id="add" checked> Addition</label>
+    <label><input type="checkbox" id="sub" checked> Subtraktion</label>
+    <label><input type="checkbox" id="mul"> Multiplikation</label>
+    <label><input type="checkbox" id="div"> Division</label>
+    <label><input type="checkbox" id="sqrt"> Wurzel</label>
+</div>
+
+<div class="box">
+    <div class="task" id="task">Drücke „Neue Aufgabe“</div>
+    <input type="number" id="answer">
+    <br>
+    <button onclick="check()">Prüfen</button>
+    <button onclick="newTask()">Neue Aufgabe</button>
+    <div class="score">Punkte: <span id="score">0</span></div>
+</div>
+
+<a href="../index.html">Zurück zur Übersicht</a>
+
+<script>
+let correctAnswer = null;
+let score = 0;
+
+function random(max) {
+    return Math.floor(Math.random() * max) + 1;
+}
+
+function newTask() {
+    const max = Number(document.getElementById("difficulty").value);
+    const types = [];
+
+    if (add.checked) types.push("add");
+    if (sub.checked) types.push("sub");
+    if (mul.checked) types.push("mul");
+    if (div.checked) types.push("div");
+    if (sqrt.checked) types.push("sqrt");
+
+    if (types.length === 0) {
+        alert("Bitte mindestens einen Aufgabentyp auswählen");
+        return;
+    }
+
+    const type = types[Math.floor(Math.random() * types.length)];
+    let a, b;
+
+    if (type === "add") {
+        a = random(max);
+        b = random(max);
+        correctAnswer = a + b;
+        task.textContent = `${a} + ${b}`;
+    }
+
+    if (type === "sub") {
+        a = random(max);
+        b = random(max);
+        correctAnswer = a - b;
+        task.textContent = `${a} - ${b}`;
+    }
+
+    if (type === "mul") {
+        a = random(max);
+        b = random(10);
+        correctAnswer = a * b;
+        task.textContent = `${a} · ${b}`;
+    }
+
+    if (type === "div") {
+        b = random(10);
+        correctAnswer = random(10);
+        a = correctAnswer * b;
+        task.textContent = `${a} ÷ ${b}`;
+    }
+
+    if (type === "sqrt") {
+        correctAnswer = random(20);
+        a = correctAnswer * correctAnswer;
+        task.textContent = `√${a}`;
+    }
+
+    answer.value = "";
+}
+
+function check() {
+    const user = Number(answer.value);
+
+    if (user === correctAnswer) {
+        score += 5;
+        alert("Richtig! +5 Punkte");
+        newTask();
+    } else {
+        score -= 10;
+        alert("Falsch! -10 Punkte\nRichtig wäre: " + correctAnswer);
+    }
+
+    document.getElementById("score").textContent = score;
+}
+</script>
 
 </body>
 </html>
