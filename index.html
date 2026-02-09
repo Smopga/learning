@@ -4,44 +4,55 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Buchstaben Nachspuren</title>
+
 <style>
-    body {
-        font-family: system-ui, -apple-system, sans-serif;
-        text-align: center;
-        background: #f5f5f5;
-        margin: 0;
-        padding: 20px;
-    }
+body {
+    font-family: system-ui, -apple-system, sans-serif;
+    background: #f2f2f2;
+    text-align: center;
+    margin: 0;
+    padding: 15px;
+}
 
-    canvas {
-        background: white;
-        border: 2px solid #333;
-        touch-action: none;
-        margin-top: 10px;
-    }
+#menu {
+    margin-bottom: 10px;
+}
 
-    button {
-        font-size: 16px;
-        padding: 10px 16px;
-        margin: 8px;
-    }
+select, button {
+    font-size: 16px;
+    padding: 6px;
+    margin: 4px;
+}
 
-    #result {
-        font-size: 18px;
-        margin-top: 10px;
-    }
+canvas {
+    background: white;
+    border: 2px solid #222;
+    touch-action: none;
+}
+#result {
+    margin-top: 10px;
+    font-size: 18px;
+}
 </style>
 </head>
+
 <body>
 
-<h2>Nachspuren mit links ✍️</h2>
+<h3>Nachspuren ✍️</h3>
 
-<canvas id="canvas" width="300" height="300"></canvas>
+<div id="menu">
+    <select id="letterSelect"></select>
 
-<div>
+    <select id="caseSelect">
+        <option value="upper">Groß</option>
+        <option value="lower">Klein</option>
+    </select>
+
     <button onclick="resetCanvas()">Reset</button>
     <button onclick="checkAccuracy()">Check</button>
 </div>
+
+<canvas id="canvas" width="320" height="320"></canvas>
 
 <div id="result">Accuracy: –</div>
 
@@ -51,18 +62,31 @@ const ctx = canvas.getContext("2d");
 
 let drawing = false;
 
-// Zielbuchstabe
-const letter = "A";
+// Buchstabenmenü füllen
+const letterSelect = document.getElementById("letterSelect");
+for (let i = 65; i <= 90; i++) {
+    letterSelect.innerHTML += `<option>${String.fromCharCode(i)}</option>`;
+}
 
-// Zeichne Vorlage
+letterSelect.value = "A";
+
+document.getElementById("caseSelect").addEventListener("change", drawTemplate);
+letterSelect.addEventListener("change", drawTemplate);
+
+// Vorlage zeichnen
 function drawTemplate() {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
-    ctx.globalAlpha = 0.2;
-    ctx.font = "220px Arial";
+
+    const letter = letterSelect.value;
+    const isUpper = document.getElementById("caseSelect").value === "upper";
+    const char = isUpper ? letter : letter.toLowerCase();
+
+    ctx.globalAlpha = 0.18;
+    ctx.font = "230px Arial";
     ctx.fillStyle = "black";
     ctx.textAlign = "center";
     ctx.textBaseline = "middle";
-    ctx.fillText(letter, canvas.width / 2, canvas.height / 2);
+    ctx.fillText(char, canvas.width / 2, canvas.height / 2);
     ctx.globalAlpha = 1;
 }
 
@@ -93,40 +117,50 @@ function resetCanvas() {
     document.getElementById("result").textContent = "Accuracy: –";
 }
 
-// Accuracy prüfen
+// Genauere Erkennung
 function checkAccuracy() {
-    // Offscreen Canvas für Vorlage
-    const temp = document.createElement("canvas");
-    temp.width = canvas.width;
-    temp.height = canvas.height;
-    const tctx = temp.getContext("2d");
+    const off = document.createElement("canvas");
+    off.width = canvas.width;
+    off.height = canvas.height;
+    const octx = off.getContext("2d");
 
-    tctx.font = "220px Arial";
-    tctx.textAlign = "center";
-    tctx.textBaseline = "middle";
-    tctx.fillText(letter, canvas.width / 2, canvas.height / 2);
+    const letter = letterSelect.value;
+    const isUpper = document.getElementById("caseSelect").value === "upper";
+    const char = isUpper ? letter : letter.toLowerCase();
+
+    octx.font = "230px Arial";
+    octx.textAlign = "center";
+    octx.textBaseline = "middle";
+    octx.fillText(char, canvas.width / 2, canvas.height / 2);
 
     const drawn = ctx.getImageData(0, 0, canvas.width, canvas.height).data;
-    const target = tctx.getImageData(0, 0, canvas.width, canvas.height).data;
+    const target = octx.getImageData(0, 0, canvas.width, canvas.height).data;
 
-    let match = 0;
-    let total = 0;
+    let hit = 0;
+    let miss = 0;
+    let totalTarget = 0;
 
     for (let i = 0; i < drawn.length; i += 4) {
-        const d = drawn[i + 3] > 50;
-        const t = target[i + 3] > 50;
+        const d = drawn[i + 3] > 40;
+        const t = target[i + 3] > 40;
 
         if (t) {
-            total++;
-            if (d) match++;
+            totalTarget++;
+            if (d) hit++;
+        } else {
+            if (d) miss++;
         }
     }
 
-    let accuracy = total === 0 ? 0 : Math.round((match / total) * 100);
+    let coverage = hit / totalTarget;          // wie viel getroffen
+    let precision = hit / (hit + miss || 1);   // wie wenig daneben
 
-    let text = "Accuracy: " + accuracy + "%";
-    if (accuracy > 60) text += " ✅ erkannt";
-    else text += " ❌ zu ungenau";
+    let accuracy = Math.round((coverage * 0.7 + precision * 0.3) * 100);
+
+    let text = "Accuracy: " + accuracy + "% ";
+    if (accuracy >= 75) text += "✅ sehr gut";
+    else if (accuracy >= 55) text += "👍 okay";
+    else text += "❌ üben";
 
     document.getElementById("result").textContent = text;
 }
