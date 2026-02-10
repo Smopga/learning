@@ -4,71 +4,26 @@
 <meta charset="UTF-8">
 <title>Mathe Pro</title>
 <style>
-body {
-    margin: 0;
-    font-family: system-ui, sans-serif;
-    background: #0f1220;
-    color: #fff;
-    padding: 20px;
-}
+body { margin:0; font-family:system-ui,sans-serif; background:#0f1220; color:#fff; padding:20px;}
+h1{text-align:center;}
+.panel{background:#1c1f3a; padding:15px; border-radius:14px; margin-bottom:15px;}
+.options{display:grid; grid-template-columns:repeat(auto-fit,minmax(160px,1fr)); gap:8px;}
+label{background:#2a2e5a; padding:10px; border-radius:10px; cursor:pointer;}
+label input{margin-right:6px;}
+.task{font-size:26px; text-align:center; margin:20px 0;}
+.answer, .fraction-input{width:100%; padding:12px; font-size:18px; border-radius:10px; border:none;}
+button{width:100%; margin-top:10px; padding:14px; font-size:18px; border:none; border-radius:12px; background:#4cafef; color:black; cursor:pointer;}
+button:hover{opacity:0.9;}
+.status, .score{text-align:center; margin-top:8px; font-size:16px;}
+#circleCanvas{display:block; margin:20px auto; background:#1c1f3a; border-radius:50%;}
 
-h1 { text-align: center; }
+/* Shake */
+@keyframes shake{0%{transform:translateX(0)}20%{transform:translateX(-6px)}40%{transform:translateX(6px)}60%{transform:translateX(-6px)}80%{transform:translateX(6px)}100%{transform:translateX(0)}}
+.shake{animation:shake .25s;}
 
-.panel {
-    background: #1c1f3a;
-    padding: 15px;
-    border-radius: 14px;
-    margin-bottom: 15px;
-}
-
-.options {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
-    gap: 8px;
-}
-
-label {
-    background: #2a2e5a;
-    padding: 10px;
-    border-radius: 10px;
-    cursor: pointer;
-}
-
-label input { margin-right: 6px; }
-
-.task { font-size: 26px; text-align: center; margin: 20px 0; }
-.answer { width: 100%; padding: 12px; font-size: 18px; border-radius: 10px; border: none; }
-
-button {
-    width: 100%; margin-top: 10px; padding: 14px; font-size: 18px;
-    border: none; border-radius: 12px; background: #4cafef; color: black; cursor: pointer;
-}
-
-button:hover { opacity: 0.9; }
-.status { text-align: center; margin-top: 10px; font-size: 16px; }
-.score { text-align: center; font-size: 18px; }
-
-/* SHAKE EFFECT */
-@keyframes shake {
-    0% { transform: translateX(0); }
-    20% { transform: translateX(-6px); }
-    40% { transform: translateX(6px); }
-    60% { transform: translateX(-6px); }
-    80% { transform: translateX(6px); }
-    100% { transform: translateX(0); }
-}
-.shake { animation: shake 0.25s; }
-
-/* CONFETTI */
-.confetti {
-    position: fixed;
-    width: 8px;
-    height: 8px;
-    top: -10px;
-    animation: fall 0.25s linear forwards;
-    z-index: 9999;
-}
-@keyframes fall { to { transform: translateY(110vh) rotate(360deg); opacity:0; } }
+/* Confetti */
+.confetti{position:fixed;width:8px;height:8px;top:-10px;animation:fall .25s linear forwards;}
+@keyframes fall{to{transform:translateY(110vh) rotate(360deg);opacity:0;}}
 </style>
 </head>
 <body>
@@ -76,43 +31,50 @@ button:hover { opacity: 0.9; }
 <h1>🧮 Mathe Pro</h1>
 
 <div class="panel">
-    <strong>Schwierigkeit / Klassenstufe</strong>
-    <select id="difficulty" class="answer">
-        <option value="1">1. Klasse</option>
-        <option value="2">2. Klasse</option>
-        <option value="3">3. Klasse</option>
-        <option value="4">4.–6. Klasse</option>
-        <option value="5">7.–9. Klasse</option>
-        <option value="6">10.–12. Klasse</option>
-        <option value="7">Berufsschule leicht</option>
-        <option value="8">Berufsschule mittel</option>
-        <option value="9">Berufsschule schwer</option>
-        <option value="10">Profi / komplex</option>
-    </select>
+<strong>Schwierigkeit / Klassenstufe</strong>
+<select id="difficulty" class="answer">
+<option value="1">1. Klasse</option>
+<option value="2">2. Klasse</option>
+<option value="3">3. Klasse</option>
+<option value="4">4.–6. Klasse</option>
+<option value="5">7.–9. Klasse</option>
+<option value="6">10.–12. Klasse</option>
+<option value="7">Berufsschule leicht</option>
+<option value="8">Berufsschule mittel</option>
+<option value="9">Berufsschule schwer</option>
+<option value="10">Profi / komplex</option>
+</select>
 </div>
 
 <div class="panel">
-    <strong>Aufgabentypen</strong>
-    <div class="options">
-        <label><input type="checkbox" id="add" checked> Addition</label>
-        <label><input type="checkbox" id="sub" checked> Subtraktion</label>
-        <label><input type="checkbox" id="mul" checked> Multiplikation</label>
-        <label><input type="checkbox" id="div"> Division</label>
-        <label><input type="checkbox" id="sqrt"> Wurzel</label>
-        <label><input type="checkbox" id="pow"> Potenz</label>
-        <label><input type="checkbox" id="brackets" checked> Klammern</label>
-        <label><input type="checkbox" id="negative"> Negative Zahlen</label>
-        <label><input type="checkbox" id="decimals"> Kommazahlen</label>
-        <label><input type="checkbox" id="chain"> Kettenaufgabe</label>
-    </div>
+<strong>Aufgabentypen</strong>
+<div class="options">
+<label><input type="checkbox" id="add" checked> Addition</label>
+<label><input type="checkbox" id="sub" checked> Subtraktion</label>
+<label><input type="checkbox" id="mul" checked> Multiplikation</label>
+<label><input type="checkbox" id="div"> Division</label>
+<label><input type="checkbox" id="sqrt"> Wurzel</label>
+<label><input type="checkbox" id="pow"> Potenz</label>
+<label><input type="checkbox" id="brackets" checked> Klammern</label>
+<label><input type="checkbox" id="negative"> Negative Zahlen</label>
+<label><input type="checkbox" id="decimals"> Kommazahlen</label>
+<label><input type="checkbox" id="chain"> Kettenaufgabe</label>
+<label><input type="checkbox" id="fraction"> Brüche</label>
+<label><input type="checkbox" id="circle"> Kreise (Durchmesser/Radius)</label>
+</div>
 </div>
 
 <div class="panel">
-    <div class="task" id="task">Neue Aufgabe starten</div>
-    <input id="answer" class="answer" type="number" step="any">
-    <button onclick="check()">Antwort prüfen</button>
-    <div class="status" id="status"></div>
-    <div class="score">Punkte: <span id="score">0</span></div>
+<div class="task" id="task">Neue Aufgabe starten</div>
+<div id="fractionInputs" style="display:none;">
+<input type="number" id="fracNum" class="fraction-input" placeholder="Zähler">
+<input type="number" id="fracDen" class="fraction-input" placeholder="Nenner">
+</div>
+<canvas id="circleCanvas" width="250" height="250" style="display:none;"></canvas>
+<input id="answer" class="answer">
+<button onclick="check()">Antwort prüfen</button>
+<div class="status" id="status"></div>
+<div class="score">Punkte: <span id="score">0</span></div>
 </div>
 
 <a href="../index.html" style="color:#8ab4ff">← Zurück</a>
@@ -120,64 +82,104 @@ button:hover { opacity: 0.9; }
 <script>
 let score=0, solution=0;
 function r(max){return Math.floor(Math.random()*max)+1;}
-function party(){for(let i=0;i<25;i++){const c=document.createElement("div");c.className="confetti";c.style.left=Math.random()*100+"vw";c.style.background=`hsl(${Math.random()*360},80%,60%)`;c.style.animationDuration="0.25s";document.body.appendChild(c);setTimeout(()=>c.remove(),300);}}
+function party(){for(let i=0;i<25;i++){const c=document.createElement("div");c.className="confetti";c.style.left=Math.random()*100+"vw";c.style.background=`hsl(${Math.random()*360},80%,60%)`;document.body.appendChild(c);setTimeout(()=>c.remove(),300);}}
 function shakeScreen(){document.body.classList.add("shake");setTimeout(()=>document.body.classList.remove("shake"),250);}
 
+const taskEl=document.getElementById("task");
+const answerEl=document.getElementById("answer");
+const fracInputs=document.getElementById("fractionInputs");
+const fracNum=document.getElementById("fracNum");
+const fracDen=document.getElementById("fracDen");
+const circleCanvas=document.getElementById("circleCanvas");
+const ctx=circleCanvas.getContext("2d");
+
 function newTask(){
-    const level = Number(difficulty.value);
+    const level=Number(document.getElementById("difficulty").value);
     let types=[];
     if(add.checked) types.push("+");
     if(sub.checked) types.push("-");
     if(mul.checked) types.push("*");
     if(div.checked) types.push("/");
     if(pow.checked) types.push("^");
-    if(types.length===0){task.textContent="Bitte mindestens einen Aufgabentyp wählen"; return;}
+    
+    // Extra Modi
+    const isFraction=fraction.checked;
+    const isCircle=circle.checked;
 
-    let expr="";
-    let partCount=1;
-    if(chain.checked){partCount=2+Math.floor(Math.random()*2);} // 2–3 Teilaufgaben
+    // Reset UI
+    fracInputs.style.display="none";
+    circleCanvas.style.display="none";
+    answerEl.style.display="block";
+    answerEl.value="";
+    taskEl.style.display="block";
 
+    // Bruch-Aufgabe
+    if(isFraction){
+        fracInputs.style.display="block";
+        answerEl.style.display="none";
+        let num=r(10); let den=r(9)+1;
+        solution={num:num,den:den};
+        taskEl.textContent=`Bruch: ${num}/${den} vereinfachen (geben Sie Zähler/Nenner ein)`;
+        return;
+    }
+
+    // Kreis-Aufgabe
+    if(isCircle){
+        circleCanvas.style.display="block";
+        answerEl.style.display="block";
+        const radius=r(50)+20;
+        solution=radius*2; // Beispiel: Aufgabe Durchmesser
+        taskEl.textContent=`Finde den Durchmesser des Kreises (Radius=${radius})`;
+        // Zeichne Kreis
+        ctx.clearRect(0,0,250,250);
+        ctx.beginPath();
+        ctx.arc(125,125,radius,0,2*Math.PI);
+        ctx.fillStyle="#4cafef33"; ctx.fill();
+        ctx.strokeStyle="#4cafef"; ctx.lineWidth=3;
+        ctx.stroke();
+        return;
+    }
+
+    // Normale Aufgabe
+    let expr=""; let partCount=1;
+    if(chain.checked) partCount=2+Math.floor(Math.random()*2);
     for(let i=0;i<partCount;i++){
         let a,b,c;
         switch(level){
-            case 1: a=r(10); b=r(10); c=r(5); break;
-            case 2: a=r(20); b=r(20); c=r(10); break;
-            case 3: a=r(50); b=r(50); c=r(20); break;
-            case 4: a=r(100); b=r(50); c=r(30); break;
-            case 5: a=r(150); b=r(100); c=r(50); break;
-            case 6: a=r(200); b=r(100); c=r(50); break;
-            case 7: a=r(300); b=r(150); c=r(100); break;
-            case 8: a=r(400); b=r(200); c=r(150); break;
-            case 9: a=r(500); b=r(200); c=r(150); break;
-            case 10:a=r(1000); b=r(500); c=r(200); break;
+            case 1:a=r(10);b=r(10);c=r(5);break;
+            case 2:a=r(20);b=r(20);c=r(10);break;
+            case 3:a=r(50);b=r(50);c=r(20);break;
+            case 4:a=r(100);b=r(50);c=r(30);break;
+            case 5:a=r(150);b=r(100);c=r(50);break;
+            case 6:a=r(200);b=r(100);c=r(50);break;
+            case 7:a=r(300);b=r(150);c=r(100);break;
+            case 8:a=r(400);b=r(200);c=r(150);break;
+            case 9:a=r(500);b=r(200);c=r(150);break;
+            case 10:a=r(1000);b=r(500);c=r(200);break;
         }
-
         let partExpr=`${a} ${types[Math.floor(Math.random()*types.length)]} ${b}`;
         if(brackets.checked && Math.random()>0.3){partExpr=`(${partExpr}) ${types[Math.floor(Math.random()*types.length)]} ${c}`;}
-        if(sqrt.checked && Math.random()>0.5 && level>=3){const s=r(Math.min(20,a)); partExpr=`Math.sqrt(${s*s}) + ${r(10)}`;}
-        if(pow.checked && Math.random()>0.6 && level>=4){const base=r(10); const exp=r(3); partExpr=`${base}**${exp} + ${r(10)}`;}
-        if(negative.checked && Math.random()>0.5){partExpr="-"+partExpr;}
-        if(decimals.checked && Math.random()>0.5){partExpr+= " + " + (Math.random()*10).toFixed(2);}
-
-        if(expr===""){expr=partExpr;}else{expr+= ` ${types[Math.floor(Math.random()*types.length)]} ${partExpr}`;}
+        solution=Math.round(eval(partExpr)*100)/100;
+        expr+=expr==""?partExpr:` ${types[Math.floor(Math.random()*types.length)]} ${partExpr}`;
     }
-
-    solution=Math.round(eval(expr)*100)/100;
-    task.textContent=expr.replace("Math.sqrt","√").replace(/\*\*/g,"^");
-    status.textContent=""; answer.value="";
+    taskEl.textContent=expr.replace(/\*\*/g,"^");
 }
 
 function check(){
-    const user=Number(answer.value);
-    if(Math.abs(user-solution)<0.01){
-        score+=5; status.textContent="✅ Richtig! +5"; party(); setTimeout(newTask,250);
+    if(fraction.checked){
+        const userNum=Number(fracNum.value);
+        const userDen=Number(fracDen.value);
+        if(userNum===solution.num && userDen===solution.den){
+            score+=5; status.textContent="✅ Richtig! +5"; party(); setTimeout(newTask,250);
+        }else{score-=10; status.textContent=`❌ Falsch! Lösung: ${solution.num}/${solution.den}`; shakeScreen();}
     }else{
-        score-=10; status.textContent="❌ Falsch! Richtige Lösung: "+solution; shakeScreen();
+        if(Number(answerEl.value)===solution){
+            score+=5; status.textContent="✅ Richtig! +5"; party(); setTimeout(newTask,250);
+        }else{score-=10; status.textContent=`❌ Falsch! Lösung: ${solution}`; shakeScreen();}
     }
-    scoreSpan.textContent=score;
+    document.getElementById("score").textContent=score;
 }
 
-const scoreSpan=document.getElementById("score");
 newTask();
 </script>
 
