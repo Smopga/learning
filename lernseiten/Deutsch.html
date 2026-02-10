@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<title>Deutsch Pro</title>
+<style>
+body {
+    margin: 0;
+    font-family: system-ui, sans-serif;
+    background: #0f1220;
+    color: #fff;
+    padding: 20px;
+}
+
+h1 { text-align: center; }
+
+.panel {
+    background: #1c1f3a;
+    padding: 15px;
+    border-radius: 14px;
+    margin-bottom: 15px;
+}
+
+.options {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+    gap: 8px;
+}
+
+label {
+    background: #2a2e5a;
+    padding: 10px;
+    border-radius: 10px;
+    cursor: pointer;
+}
+
+.task {
+    font-size: 22px;
+    text-align: center;
+    margin: 15px 0;
+}
+
+.answer {
+    width: 100%;
+    padding: 12px;
+    font-size: 18px;
+    border-radius: 10px;
+    border: none;
+}
+
+button {
+    width: 100%;
+    margin-top: 10px;
+    padding: 14px;
+    font-size: 18px;
+    border: none;
+    border-radius: 12px;
+    background: #4cafef;
+    color: black;
+    cursor: pointer;
+}
+
+.status, .score {
+    text-align: center;
+    margin-top: 8px;
+    font-size: 16px;
+}
+
+/* Shake */
+@keyframes shake {
+    0%{transform:translateX(0)}
+    25%{transform:translateX(-6px)}
+    50%{transform:translateX(6px)}
+    75%{transform:translateX(-6px)}
+    100%{transform:translateX(0)}
+}
+.shake { animation: shake .25s; }
+
+/* Confetti */
+.confetti {
+    position: fixed;
+    width: 8px;
+    height: 8px;
+    top: -10px;
+    animation: fall .25s linear forwards;
+}
+@keyframes fall {
+    to { transform: translateY(110vh) rotate(360deg); opacity:0; }
+}
+</style>
+</head>
+<body>
+
+<h1>📘 Deutsch Pro</h1>
+
+<div class="panel">
+<strong>Klassenstufe</strong>
+<select id="level" class="answer">
+    <option value="1">1.–3. Klasse</option>
+    <option value="2">4.–6. Klasse</option>
+    <option value="3">7.–9. Klasse</option>
+    <option value="4">10.–12. Klasse</option>
+    <option value="5">Berufsschule</option>
+</select>
+</div>
+
+<div class="panel">
+<strong>Lernmodi</strong>
+<div class="options">
+    <label><input type="checkbox" id="spell" checked> Rechtschreibung</label>
+    <label><input type="checkbox" id="case"> Groß/Klein</label>
+    <label><input type="checkbox" id="article"> Artikel</label>
+    <label><input type="checkbox" id="tense"> Zeitform</label>
+    <label><input type="checkbox" id="syn"> Synonym</label>
+    <label><input type="checkbox" id="sentence"> Satzbau</label>
+    <label><input type="checkbox" id="gap"> Lückentext</label>
+    <label><input type="checkbox" id="choice"> Multiple Choice</label>
+</div>
+</div>
+
+<div class="panel">
+<div class="task" id="task">Neue Aufgabe</div>
+<input id="answer" class="answer">
+<button onclick="check()">Antwort prüfen</button>
+<div class="status" id="status"></div>
+<div class="score">Punkte: <span id="score">0</span></div>
+</div>
+
+<a href="../index.html" style="color:#8ab4ff">← Zurück</a>
+
+<script>
+let score=0, solution="";
+const words=[
+    ["Haus","der"],["Blume","die"],["Auto","das"],
+    ["Baum","der"],["Katze","die"],["Buch","das"]
+];
+const synonyms={
+    schnell:"rasch",
+    groß:"riesig",
+    klein:"winzig",
+    schön:"hübsch"
+};
+const sentences=[
+    ["Ich","gehe","heute","zur","Schule"],
+    ["Der","Hund","läuft","sehr","schnell"]
+];
+
+function party(){
+    for(let i=0;i<20;i++){
+        const c=document.createElement("div");
+        c.className="confetti";
+        c.style.left=Math.random()*100+"vw";
+        c.style.background=`hsl(${Math.random()*360},80%,60%)`;
+        document.body.appendChild(c);
+        setTimeout(()=>c.remove(),300);
+    }
+}
+function shake(){
+    document.body.classList.add("shake");
+    setTimeout(()=>document.body.classList.remove("shake"),250);
+}
+
+function newTask(){
+    let modes=[];
+    if(spell.checked) modes.push("spell");
+    if(case.checked) modes.push("case");
+    if(article.checked) modes.push("article");
+    if(tense.checked) modes.push("tense");
+    if(syn.checked) modes.push("syn");
+    if(sentence.checked) modes.push("sentence");
+    if(gap.checked) modes.push("gap");
+    if(choice.checked) modes.push("choice");
+    if(modes.length===0){task.textContent="Bitte Modus wählen";return;}
+
+    const mode=modes[Math.floor(Math.random()*modes.length)];
+    answer.value="";
+
+    if(mode==="article"){
+        const w=words[Math.floor(Math.random()*words.length)];
+        task.textContent=`Artikel von "${w[0]}"?`;
+        solution=w[1];
+    }
+
+    if(mode==="syn"){
+        const keys=Object.keys(synonyms);
+        const k=keys[Math.floor(Math.random()*keys.length)];
+        task.textContent=`Synonym für "${k}"?`;
+        solution=synonyms[k];
+    }
+
+    if(mode==="sentence"){
+        const s=sentences[Math.floor(Math.random()*sentences.length)];
+        task.textContent=`Ordne: ${s.sort(()=>Math.random()-.5).join(" ")}`;
+        solution=s.join(" ");
+    }
+
+    if(mode==="spell"){
+        solution="Schule";
+        task.textContent="Schreibe richtig: schule";
+    }
+
+    if(mode==="case"){
+        solution="groß";
+        task.textContent="Wird dieses Wort groß oder klein geschrieben: haus (am Satzanfang)";
+    }
+
+    if(mode==="gap"){
+        solution="geht";
+        task.textContent="Ich ___ heute nach Hause.";
+    }
+
+    if(mode==="choice"){
+        solution="weil";
+        task.textContent="Ich bleibe zu Hause, ___ es regnet.";
+    }
+
+    status.textContent="";
+}
+
+function check(){
+    if(answer.value.trim().toLowerCase()===solution.toLowerCase()){
+        score+=5;
+        status.textContent="✅ Richtig!";
+        party();
+        setTimeout(newTask,250);
+    }else{
+        score-=10;
+        status.textContent="❌ Falsch! Lösung: "+solution;
+        shake();
+    }
+    score.textContent=score;
+}
+
+newTask();
+</script>
+
+</body>
+</html>
